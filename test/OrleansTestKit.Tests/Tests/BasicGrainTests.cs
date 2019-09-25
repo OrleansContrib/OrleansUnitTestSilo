@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Orleans.Runtime;
 using TestGrains;
 using TestInterfaces;
 using Xunit;
@@ -61,8 +62,14 @@ namespace Orleans.TestKit.Tests
             var grain = await Silo.CreateGrainAsync<IntegerKeyGrain>(id);
 
             var key = await grain.GetKey();
+            var keyLong = grain.GetPrimaryKeyLong();
+            var referenceKey = grain.GrainReference.GetPrimaryKeyLong();
+            var addressableKey = ((IAddressable)grain).GetPrimaryKeyLong();
 
             key.Should().Be(id);
+            keyLong.Should().Be(id);
+            referenceKey.Should().Be(id);
+            addressableKey.Should().Be(id);
         }
 
         [Fact]
@@ -74,9 +81,21 @@ namespace Orleans.TestKit.Tests
             var grain = await Silo.CreateGrainAsync<IntegerCompoundKeyGrain>(id, ext);
 
             var key = await grain.GetKey();
+            var keyLong = grain.GetPrimaryKeyLong(out var keyExt);
+            var referenceKey = grain.GrainReference.GetPrimaryKeyLong(out var referenceKeyExt);
+            var addressableKey = ((IAddressable)grain).GetPrimaryKeyLong(out var addressableKeyExt);
 
             key.Item1.Should().Be(id);
             key.Item2.Should().Be(ext);
+
+            keyLong.Should().Be(id);
+            keyExt.Should().Be(ext);
+
+            referenceKey.Should().Be(id);
+            referenceKeyExt.Should().Be(ext);
+
+            addressableKey.Should().Be(id);
+            addressableKeyExt.Should().Be(ext);
         }
 
         [Fact]
@@ -88,7 +107,14 @@ namespace Orleans.TestKit.Tests
 
             var key = await grain.GetKey();
 
+            var keyGuid = grain.GetPrimaryKey();
+            var referenceKey = grain.GrainReference.GetPrimaryKey();
+            var addressableKey = ((IAddressable)grain).GetPrimaryKey();
+
             key.Should().Be(id);
+            keyGuid.Should().Be(id);
+            referenceKey.Should().Be(id);
+            addressableKey.Should().Be(id);
         }
 
         [Fact]
@@ -101,8 +127,22 @@ namespace Orleans.TestKit.Tests
 
             var key = await grain.GetKey();
 
+            var keyGuid = grain.GetPrimaryKey(out var keyExt);
+            var referenceKey = grain.GrainReference.GetPrimaryKey(out var referenceKeyExt);
+            var addressableKey = ((IAddressable)grain).GetPrimaryKey(out var addressableKeyExt);
+
             key.Item1.Should().Be(id);
             key.Item2.Should().Be(ext);
+
+            keyGuid.Should().Be(id);
+            keyExt.Should().Be(ext);
+
+            referenceKey.Should().Be(id);
+            referenceKeyExt.Should().Be(ext);
+
+            addressableKey.Should().Be(id);
+            addressableKeyExt.Should().Be(ext);
+
         }
 
         [Fact]
@@ -114,7 +154,14 @@ namespace Orleans.TestKit.Tests
 
             var key = await grain.GetKey();
 
+            var keyString = grain.GetPrimaryKeyString();
+            var referenceKey = grain.GrainReference.GetPrimaryKeyString();
+            var addressableKey = ((IAddressable)grain).GetPrimaryKeyString();
+
             key.Should().Be(id);
+            keyString.Should().Be(id);
+            referenceKey.Should().Be(id);
+            addressableKey.Should().Be(id);
         }
 
         [Fact]
@@ -126,7 +173,14 @@ namespace Orleans.TestKit.Tests
 
             var key = await grain.GetKey();
 
+            var keyLong = grain.GetPrimaryKeyLong();
+            var referenceKey = grain.GrainReference.GetPrimaryKeyLong();
+            var addressableKey = ((IAddressable)grain).GetPrimaryKeyLong();
+
             key.Should().Be(id);
+            keyLong.Should().Be(id);
+            referenceKey.Should().Be(id);
+            addressableKey.Should().Be(id);
         }
 
         [Fact]
@@ -138,7 +192,14 @@ namespace Orleans.TestKit.Tests
 
             var key = await grain.GetKey();
 
+            var keyGuid = grain.GetPrimaryKey();
+            var referenceKey = grain.GrainReference.GetPrimaryKey();
+            var addressableKey = ((IAddressable)grain).GetPrimaryKey();
+
             key.Should().Be(id);
+            keyGuid.Should().Be(id);
+            referenceKey.Should().Be(id);
+            addressableKey.Should().Be(id);
         }
 
         [Fact]
@@ -149,8 +210,14 @@ namespace Orleans.TestKit.Tests
             var grain = await Silo.CreateGrainAsync<StatefulStringKeyGrain>(id);
 
             var key = await grain.GetKey();
+            var keyString = grain.GetPrimaryKeyString();
+            var referenceKey = grain.GrainReference.GetPrimaryKeyString();
+            var addressableKey = ((IAddressable)grain).GetPrimaryKeyString();
 
             key.Should().Be(id);
+            keyString.Should().Be(id);
+            referenceKey.Should().Be(id);
+            addressableKey.Should().Be(id);
         }
     }
 }

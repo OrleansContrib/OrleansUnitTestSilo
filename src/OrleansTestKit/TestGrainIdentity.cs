@@ -7,7 +7,7 @@ namespace Orleans.TestKit
     [DebuggerStepThrough]
     public sealed class TestGrainIdentity : IGrainIdentity
     {
-        private enum KeyType
+        internal enum KeyTypes
         {
             String,
             Guid,
@@ -16,7 +16,7 @@ namespace Orleans.TestKit
             LongCompound
         }
 
-        private readonly KeyType _keyType;
+        internal readonly KeyTypes KeyType;
 
         public Guid PrimaryKey { get; }
 
@@ -30,17 +30,17 @@ namespace Orleans.TestKit
         {
             get
             {
-                switch (_keyType)
+                switch (KeyType)
                 {
-                    case KeyType.String:
+                    case KeyTypes.String:
                         return PrimaryKeyString;
-                    case KeyType.Guid:
+                    case KeyTypes.Guid:
                         return PrimaryKey.ToString();
-                    case KeyType.Long:
+                    case KeyTypes.Long:
                         return PrimaryKeyLong.ToString();
-                    case KeyType.GuidCompound:
+                    case KeyTypes.GuidCompound:
                         return $"{PrimaryKey}|{KeyExtension}";
-                    case KeyType.LongCompound:
+                    case KeyTypes.LongCompound:
                         return $"{PrimaryKeyLong}|{KeyExtension}";
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -55,21 +55,21 @@ namespace Orleans.TestKit
         public TestGrainIdentity(Guid id, string keyExtension = null)
         {
             PrimaryKey = id;
-            _keyType = keyExtension != null ? KeyType.GuidCompound : KeyType.Guid;
+            KeyType = keyExtension != null ? KeyTypes.GuidCompound : KeyTypes.Guid;
             KeyExtension = keyExtension;
         }
 
         public TestGrainIdentity(long id, string keyExtension = null)
         {
             PrimaryKeyLong = id;
-            _keyType = keyExtension != null ? KeyType.LongCompound : KeyType.Long;
+            KeyType = keyExtension != null ? KeyTypes.LongCompound : KeyTypes.Long;
             KeyExtension = keyExtension;
         }
 
         public TestGrainIdentity(string id)
         {
             PrimaryKeyString = id;
-            _keyType = KeyType.String;
+            KeyType = KeyTypes.String;
         }
 
         public long GetPrimaryKeyLong(out string keyExt)
