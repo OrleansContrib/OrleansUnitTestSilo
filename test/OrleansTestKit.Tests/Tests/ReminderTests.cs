@@ -151,5 +151,21 @@ namespace Orleans.TestKit.Tests
             // Assert
             Silo.ReminderRegistry.Mock.Verify(v => v.GetReminder("a"), Times.Once);
         }
+
+        [Fact]
+        public async Task SettingCurrentTimeFiresDueReminders()
+        {
+            // Arrange
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
+            const string reminderName = "abc123";
+            await grain.RegisterReminder(reminderName, TimeSpan.FromMinutes(5), TimeSpan.MaxValue);
+
+            // Act
+            await Silo.ReminderRegistry.SetCurrentTime(DateTime.UtcNow.AddMinutes(10));
+
+            // Assert
+            grain.FiredReminders.Should().Contain(reminderName);
+            grain.FiredReminders.Count.Should().Be(1);
+        }
     }
 }
