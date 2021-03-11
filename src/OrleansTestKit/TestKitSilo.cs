@@ -111,6 +111,9 @@ namespace Orleans.TestKit
                 throw new Exception("A grain has already been created in this silo. Only 1 grain per test silo should ever be created. Add grain probes for supporting grains.");
             }
 
+            // Add state attribute mapping for storage facets
+            this.AddService(StorageManager.stateAttributeFactoryMapperMock.Object);
+
             _isGrainCreated = true;
             Grain grain;
             var grainContext = new TestGrainActivationContext

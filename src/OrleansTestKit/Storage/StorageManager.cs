@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using Moq;
 using Orleans.Core;
+using Orleans.Runtime;
 
 namespace Orleans.TestKit.Storage
 {
@@ -7,26 +10,48 @@ namespace Orleans.TestKit.Storage
     {
         private readonly TestKitOptions _options;
 
-        private object _storage;
+        private readonly Dictionary<string, object> _storages = new Dictionary<string, object>();
 
         public StorageManager(TestKitOptions options) =>
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
-        public IStorage<TState> GetStorage<TState>()
+        internal readonly Mock<IAttributeToFactoryMapper<PersistentStateAttribute>> stateAttributeFactoryMapperMock =
+            new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+
+        public IStorage<TState> GetStorage<TState>() => GetStorage<TState>("Default");
+
+        public IStorage<TState> GetStorage<TState>(string stateName)
         {
-            if (_storage == null)
+            var normalisedStateName = stateName ?? "Default";
+
+            if (_storages.TryGetValue(normalisedStateName, out var storage) is false)
             {
-                _storage = _options.StorageFactory?.Invoke(typeof(TState)) ?? new TestStorage<TState>();
+                storage = _storages[normalisedStateName] = _options.StorageFactory?.Invoke(typeof(TState)) ?? new TestStorage<TState>();
             }
 
-            return _storage as IStorage<TState>;
+            return storage as IStorage<TState>;
         }
 
-        public TestStorageStats GetStorageStats()
+        public TestStorageStats GetStorageStats() => GetStorageStats("Default");
+
+        public TestStorageStats GetStorageStats(string stateName)
         {
-            //There should only be one state in here since there is only 1 grain under test
-            var stats = _storage as IStorageStats;
-            return stats?.Stats;
+            var normalisedStateName = stateName ?? "Default";
+
+            if (_storages.TryGetValue(normalisedStateName, out var storage))
+            {
+                var stats = storage as IStorageStats;
+                return stats?.Stats;
+            }
+
+            return null;
+        }
+
+        internal void AddStorage<TState>(IStorage<TState> storage, string stateName = default)
+        {
+            var normalisedStateName = stateName ?? "Default";
+
+            _storages[normalisedStateName] = storage;
         }
     }
 }
