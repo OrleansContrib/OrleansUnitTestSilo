@@ -58,6 +58,6 @@ namespace Orleans.TestKit
         }
 
         public IStorage<TGrainState> GetStorage<TGrainState>(Grain grain) =>
-            _storageManager.GetStorage<TGrainState>();
+            _storageManager.GetStorage<TGrainState>(grain.GetType().FullName);
     }
 }
