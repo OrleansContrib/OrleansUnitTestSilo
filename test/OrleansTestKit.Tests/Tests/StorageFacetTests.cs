@@ -20,7 +20,7 @@ namespace Orleans.TestKit.Tests
         public async Task GetColor_WithDefaultState_ReturnsUnknown()
         {
             // Arrange
-            Silo.AddPersistentState<ColorGrainState>();
+            Silo.AddPersistentState<ColorGrainState>("State");
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -41,7 +41,7 @@ namespace Orleans.TestKit.Tests
                 Id = GrainId,
             };
 
-            Silo.AddPersistentState(state: state);
+            Silo.AddPersistentState(stateName: "State", state: state);
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -57,7 +57,7 @@ namespace Orleans.TestKit.Tests
         {
             // Arrange
             var state = new ColorGrainState();
-            Silo.AddPersistentState(state: state);
+            Silo.AddPersistentState(stateName: "State", state: state);
 
             // Act
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
@@ -72,7 +72,7 @@ namespace Orleans.TestKit.Tests
         {
             // Arrange
             var state = new ColorGrainState();
-            Silo.AddPersistentState(state: state);
+            Silo.AddPersistentState(stateName: "State", state: state);
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -86,7 +86,7 @@ namespace Orleans.TestKit.Tests
             // Note that the following assert ties this test to the _implementation_ details. Generally, one should try
             // to avoid tying the test to the implementation details. It can lead to more brittle tests. However, one may
             // choose to accept this as a trade-off when the implementation detail represents an important behavior.
-            var storageStats = Silo.StorageManager.GetStorageStats();
+            var storageStats = Silo.StorageManager.GetStorageStats(stateName: "State");
             storageStats.Clears.Should().Be(0);
         }
 
@@ -99,7 +99,7 @@ namespace Orleans.TestKit.Tests
                 Color = Color.Red,
                 Id = GrainId,
             };
-            Silo.AddPersistentState(state: state);
+            Silo.AddPersistentState(stateName: "State", state: state);
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -107,7 +107,7 @@ namespace Orleans.TestKit.Tests
             await grain.ResetColor();
 
             // Assert
-            var storageStats = Silo.StorageManager.GetStorageStats();
+            var storageStats = Silo.StorageManager.GetStorageStats(stateName: "State");
             storageStats.Clears.Should().Be(1);
         }
 
@@ -116,7 +116,7 @@ namespace Orleans.TestKit.Tests
         {
             // Arrange
             var state = new ColorGrainState();
-            Silo.AddPersistentState(state: state);
+            Silo.AddPersistentState(stateName: "State", state: state);
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -134,7 +134,7 @@ namespace Orleans.TestKit.Tests
         public async Task SetColor_WithInvalidColor_ThrowsArgumentException(Color color)
         {
             // Arrange
-            Silo.AddPersistentState<ColorGrainState>();
+            Silo.AddPersistentState<ColorGrainState>(stateName: "State");
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
             Action action = () => grain.SetColor(color);
@@ -152,7 +152,7 @@ namespace Orleans.TestKit.Tests
             mock.SetupAllProperties();
             mock.Setup(o => o.WriteStateAsync()).Throws<InconsistentStateException>();
 
-            Silo.AddPersistentState(storage: mock.Object);
+            Silo.AddPersistentState(stateName: "State", storage: mock.Object);
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
             Action action = () => grain.SetColor(Color.Green);
@@ -170,7 +170,7 @@ namespace Orleans.TestKit.Tests
                 Color = Color.Red,
                 Id = GrainId,
             };
-            Silo.AddPersistentState(state: state);
+            Silo.AddPersistentState(stateName: "State", state: state);
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 

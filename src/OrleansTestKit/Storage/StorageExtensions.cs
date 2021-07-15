@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using Orleans.Core;
 using Orleans.Runtime;
+using Orleans.Storage;
 using Orleans.TestKit.Storage;
 
 namespace Orleans.TestKit
@@ -23,7 +24,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.StorageManager.GetStorage<TState>().State;
+            return silo.StorageManager.GetStorageStats();
         }
 
         public static IStorage<T> AddGrainState<TGrain, T>(
@@ -44,7 +45,7 @@ namespace Orleans.TestKit
 
         public static IPersistentState<T> AddPersistentState<T>(
             this TestKitSilo silo,
-            string stateName = default,
+            string stateName,
             string storageName = default,
             T state = default)
             where T : new()
@@ -52,6 +53,11 @@ namespace Orleans.TestKit
             if (silo == null)
             {
                 throw new ArgumentNullException(nameof(silo));
+            }
+
+            if (string.IsNullOrWhiteSpace(stateName))
+            {
+                throw new ArgumentException("A state name must be provided", nameof(stateName));
             }
 
             var storage = silo.StorageManager.GetStorage<T>(stateName);
@@ -62,7 +68,7 @@ namespace Orleans.TestKit
         public static IPersistentState<T> AddPersistentState<T>(
             this TestKitSilo silo,
             IStorage<T> storage,
-            string stateName = default,
+            string stateName,
             string storageName = default,
             T state = default)
             where T : new()

@@ -83,10 +83,10 @@ namespace Orleans.TestKit.Tests
             var greetings = (await grain.GetGreetings()).ToList();
 
             // Assert
-            var state = this.Silo.State<GreetingArchiveGrainState>();
+            var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
             state.Greetings.Should().Equal(greeting1, greeting2);
             greetings.Should().Equal(greeting1, greeting2);
-            Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+            Assert.True(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Orleans.TestKit.Tests
             stats.Writes.Should().Be(2);
 
             greetings.Should().Equal(greeting1, greeting2);
-            Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+            Assert.True(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Orleans.TestKit.Tests
             const long id = 2000;
             const string greeting = "Hola";
 
-            var state = this.Silo.State<GreetingArchiveGrainState>();
+            var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
             state.Greetings.Add(greeting);
 
             var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
@@ -187,7 +187,7 @@ namespace Orleans.TestKit.Tests
             const long id = 5000;
             const string greeting = "Olá";
 
-            var state = this.Silo.State<GreetingArchiveGrainState>();
+            var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
             state.Greetings.Add(greeting);
 
             var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
@@ -198,11 +198,11 @@ namespace Orleans.TestKit.Tests
             var greetings = (await grain.GetGreetings()).ToList();
 
             // Assert
-            state = this.Silo.State<GreetingArchiveGrainState>();
+            state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
             state.Greetings.Should().BeEmpty();
 
             greetings.Should().BeEmpty();
-            Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+            Assert.False(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace Orleans.TestKit.Tests
             const long id = 6000;
             const string greeting = "Hallo";
 
-            var state = this.Silo.State<GreetingArchiveGrainState>();
+            var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
             state.Greetings.Add(greeting);
 
             var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
@@ -233,7 +233,7 @@ namespace Orleans.TestKit.Tests
             stats.Writes.Should().Be(0);
 
             greetings.Should().BeEmpty();
-            Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+            Assert.False(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>This test demonstrates how to use the RecordExists flag</summary>
@@ -241,7 +241,7 @@ namespace Orleans.TestKit.Tests
         public async Task RecordExistsFlagTest()
         {
             var manager = new StorageManager(new TestKitOptions());
-            var state = manager.GetStorage<GreetingArchiveGrainState>();
+            var state = manager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>();
 
             // be default, RecordExists is false
             Assert.False(state.RecordExists);

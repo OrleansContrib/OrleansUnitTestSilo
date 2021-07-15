@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Moq;
 using Orleans.Core;
 using Orleans.Runtime;
@@ -25,21 +27,43 @@ namespace Orleans.TestKit.Storage
 
         public IStorage<TState> GetStorage<TState>(string stateName)
         {
-            var normalisedStateName = stateName ?? "Default";
-
-            if (_storages.TryGetValue(normalisedStateName, out var storage) is false)
+            if (string.IsNullOrWhiteSpace(stateName))
             {
-                storage = _storages[normalisedStateName] = _options.StorageFactory?.Invoke(typeof(TState)) ?? new TestStorage<TState>();
+                foreach (var kvp in _storages)
+                {
+                    if (kvp.Value is TestStorage<TState> typedStorage)
+                    {
+                        return typedStorage;
+                    }
+                }
+
+                throw new InvalidOperationException($"Unable to find any storage with type '{typeof(TState).FullName}'");
+            }
+
+            if (_storages.TryGetValue(stateName, out var storage) is false)
+            {
+                storage = _storages[stateName] = _options.StorageFactory?.Invoke(typeof(TState)) ?? new TestStorage<TState>();
             }
 
             return storage as IStorage<TState>;
         }
 
-        public TestStorageStats GetStorageStats() => GetStorageStats("Default");
+        public TestStorageStats GetStorageStats() => GetStorageStats(null);
 
         public TestStorageStats GetStorageStats(string stateName)
         {
-            var normalisedStateName = stateName ?? "Default";
+            if (string.IsNullOrWhiteSpace(stateName))
+            {
+                if (_storages.Count > 0)
+                {
+                    var stats = _storages.First().Value as IStorageStats;
+                    return stats?.Stats;
+                }
+
+                return null;
+            }
+
+            var normalisedStateName = stateName;
 
             if (_storages.TryGetValue(normalisedStateName, out var storage))
             {
@@ -50,11 +74,6 @@ namespace Orleans.TestKit.Storage
             return null;
         }
 
-        internal void AddStorage<TState>(IStorage<TState> storage, string stateName = default)
-        {
-            var normalisedStateName = stateName ?? "Default";
-
-            _storages[normalisedStateName] = storage;
-        }
+        internal void AddStorage<TState>(IStorage<TState> storage, string stateName) => _storages[stateName] = storage;
     }
 }
