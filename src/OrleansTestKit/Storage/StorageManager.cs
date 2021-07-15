@@ -20,7 +20,8 @@ namespace Orleans.TestKit.Storage
 
         internal readonly TestPersistentStateAttributeToFactoryMapper stateAttributeFactoryMapper;
 
-        public IStorage<TState> GetStorage<TState>() => GetStorage<TState>("Default");
+        public IStorage<TState> GetGrainStorage<TGrain, TState>() where TGrain : Grain<TState>
+            => GetStorage<TState>(typeof(TGrain).FullName);
 
         public IStorage<TState> GetStorage<TState>(string stateName)
         {

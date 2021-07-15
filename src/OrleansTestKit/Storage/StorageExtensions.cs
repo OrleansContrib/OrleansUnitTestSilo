@@ -11,7 +11,12 @@ namespace Orleans.TestKit
 {
     public static class StorageExtensions
     {
-        public static TState State<TState>(this TestKitSilo silo) where TState : class, new()
+        public static TState State<TGrain, TState>(this TestKitSilo silo)
+            where TGrain : Grain<TState>
+            where TState : class, new()
+        => silo.StorageManager.GetGrainStorage<TGrain, TState>().State;
+
+        public static TestStorageStats StorageStats(this TestKitSilo silo)
         {
             if (silo == null)
             {
@@ -21,14 +26,20 @@ namespace Orleans.TestKit
             return silo.StorageManager.GetStorage<TState>().State;
         }
 
-        public static TestStorageStats StorageStats(this TestKitSilo silo)
+        public static IStorage<T> AddGrainState<TGrain, T>(
+            this TestKitSilo silo,
+            T state = default)
+            where TGrain : Grain<T>
+            where T : new()
         {
             if (silo == null)
             {
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.StorageManager.GetStorageStats();
+            var storage = silo.StorageManager.GetGrainStorage<TGrain, T>();
+            storage.State = state ?? new T();
+            return storage;
         }
 
         public static IPersistentState<T> AddPersistentState<T>(
