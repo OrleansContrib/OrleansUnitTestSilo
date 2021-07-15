@@ -181,5 +181,93 @@ namespace Orleans.TestKit.Tests
             state.Color.Should().Be(Color.Blue);
             state.Id.Should().Be(GrainId);
         }
+
+        [Fact]
+        public async Task GetColor_WithGrainState_ReturnsColor()
+        {
+            // Arrange
+            var state = new ColorGrainState
+            {
+                Color = Color.Red,
+                Id = GrainId,
+            };
+
+            Silo.AddGrainState<ColorRankingGrain, ColorGrainState>(state: state);
+
+            var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+            // Act
+            var color = await grain.GetLeastFavouriteColor();
+            color.Should().Be(Color.Red);
+        }
+
+        [Fact]
+        public async Task SetLeastFavouriteColor_WithDefaultGrainState_SetsState()
+        {
+            var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+            // Act
+            await grain.SetLeastFavouriteColor(Color.Blue);
+
+            var storage = Silo.StorageManager.GetGrainStorage<ColorRankingGrain, ColorGrainState>();
+            var state = storage.State;
+
+            state.Color.Should().Be(Color.Blue);
+            state.Id.Should().Be(GrainId);
+        }
+
+        [Fact]
+        public async Task GetLeastFavouriteColor_WithGrainState_ReturnsColor()
+        {
+            // Arrange
+            var state = new ColorGrainState
+            {
+                Color = Color.Red,
+                Id = GrainId,
+            };
+
+            Silo.AddGrainState<ColorRankingGrain, ColorGrainState>(state: state);
+
+            var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+            // Act
+            var color = await grain.GetLeastFavouriteColor();
+            color.Should().Be(Color.Red);
+        }
+
+        [Fact]
+        public async Task SetFavouriteColor_WithState_SetsState()
+        {
+            var persistentState = Silo.AddPersistentState("Default", state: new ColorGrainState
+            {
+                Id = GrainId,
+                Color = Color.Red
+            });
+
+            var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+            // Act
+            await grain.SetFavouriteColor(Color.Blue);
+
+            var state = persistentState.State;
+            state.Color.Should().Be(Color.Blue);
+            state.Id.Should().Be(GrainId);
+        }
+
+        [Fact]
+        public async Task GetFavouriteColor_WithState_ReturnsColor()
+        {
+            Silo.AddPersistentState("Default", state: new ColorGrainState
+            {
+                Id = GrainId,
+                Color = Color.Blue
+            });
+
+            var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+            // Act
+            var color = await grain.GetFavouriteColor();
+            color.Should().Be(Color.Blue);
+        }
     }
 }
