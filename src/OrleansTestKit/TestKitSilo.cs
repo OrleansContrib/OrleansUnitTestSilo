@@ -112,7 +112,7 @@ namespace Orleans.TestKit
             }
 
             // Add state attribute mapping for storage facets
-            this.AddService(StorageManager.stateAttributeFactoryMapperMock.Object);
+            this.AddService<IAttributeToFactoryMapper<PersistentStateAttribute>>(StorageManager.stateAttributeFactoryMapper);
 
             _isGrainCreated = true;
             Grain grain;

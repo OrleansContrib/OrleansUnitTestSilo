@@ -61,33 +61,18 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            silo.StorageManager.AddStorage(storage, stateName);
-            var stateMock = new PersistentStateFake<T>(storage)
-            {
-                State = state ?? new T()
-            };
-
-            var mockMapper = silo.StorageManager.stateAttributeFactoryMapperMock;
-
             if (string.IsNullOrWhiteSpace(stateName))
             {
-                mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(_ => stateMock);
-            }
-            else if (string.IsNullOrWhiteSpace(storageName))
-            {
-                mockMapper
-                    .Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.Is<PersistentStateAttribute>(attr => attr.StateName.Equals(stateName, StringComparison.OrdinalIgnoreCase))))
-                    .Returns(_ => stateMock);
-            }
-            else
-            {
-                mockMapper
-                    .Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.Is<PersistentStateAttribute>(attr =>
-                        attr.StateName.Equals(stateName, StringComparison.OrdinalIgnoreCase) && (attr.StorageName == null || attr.StorageName.Equals(storageName, StringComparison.OrdinalIgnoreCase)))))
-                    .Returns(_ => stateMock);
+                throw new ArgumentException("A state name must be provided", nameof(stateName));
             }
 
-            return stateMock;
+            if (storage is null)
+            {
+                throw new ArgumentNullException(nameof(storage));
+            }
+
+            silo.StorageManager.AddStorage(storage, stateName);
+            return silo.StorageManager.stateAttributeFactoryMapper.AddPersistentState(storage, stateName, storageName, state);
         }
     }
 

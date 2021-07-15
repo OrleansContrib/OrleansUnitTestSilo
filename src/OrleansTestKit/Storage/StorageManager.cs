@@ -12,11 +12,13 @@ namespace Orleans.TestKit.Storage
 
         private readonly Dictionary<string, object> _storages = new Dictionary<string, object>();
 
-        public StorageManager(TestKitOptions options) =>
+        public StorageManager(TestKitOptions options)
+        {
             _options = options ?? throw new ArgumentNullException(nameof(options));
+            stateAttributeFactoryMapper = new TestPersistentStateAttributeToFactoryMapper(this);
+        }
 
-        internal readonly Mock<IAttributeToFactoryMapper<PersistentStateAttribute>> stateAttributeFactoryMapperMock =
-            new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        internal readonly TestPersistentStateAttributeToFactoryMapper stateAttributeFactoryMapper;
 
         public IStorage<TState> GetStorage<TState>() => GetStorage<TState>("Default");
 
